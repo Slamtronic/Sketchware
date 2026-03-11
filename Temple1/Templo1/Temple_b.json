@@ -1,0 +1,1 @@
+[{"code":"%1$s.onDelay(%2$s);","color":"#FFFF9800","name":"delay timr","typeName":"","palette":"20","type":" ","spec":"%m.TEMPLE delay%d "},{"code":"%1$s.test_Merror(%2$s);","color":"#FFFF9800","name":"merror message testtimr_copy96","typeName":"","palette":"20","type":" ","spec":"%m.TEMPLE txt%s "}]
