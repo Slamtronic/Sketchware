@@ -1,0 +1,1 @@
+[{"defineAdditionalVar":"","varName":"Server","imports":"slam.tronic.Server\njava.io.*\njava.net.*","name":"Server","typeName":"Server","icon":"2131165594","description":"","id":"37","class":"Component.ServerSoket","buildClass":"Server","url":"","additionalVar":"public ServerSocket s_###;\npublic Socket sec###;\npublic BufferedReader in### ;\npublic PrintWriter out### ;\n\n"}]
