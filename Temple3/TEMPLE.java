@@ -1,76 +1,82 @@
 package slam.tronic;
 
 import android.content.Context;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.os.Handler;
-import java.io.IOException;
-import android.content.*;
-import android.os.*;
-import java.io.*;
-import java.lang.reflect.Method;
-import java.util.*;
+import android.util.Base64;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.graphics.Bitmap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.security.MessageDigest;
 
 public class TEMPLE {
 
     private Context context;
-    private Handler handler;
-    private  final int STATE_WAITING=1;
-   private  final int STATE_MESSAGE_RECEIVED=2;
-    //===========
+    private static Handler handler;
+    private static String qrstr = "";
+
+    private static final int STATE_WAITING = 1;
+    private static final int STATE_MESSAGE_RECEIVED = 2;
+
     public TEMPLE(Context ctx, Handler h) {
         context = ctx;
         handler = h;
-        //adapter = BluetoothAdapter.getDefaultAdapter();
     }
-    //===========
 
-   private final BroadcastReceiver receiver = new BroadcastReceiver() {
+    public TEMPLE(Context ctx) {
+        context = ctx;
+    }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
-          //  String str=Intent.getAction();
-            switch (intent.getAction()){ 
-             case "action example":
-               //do something 
-               break;
-               
-               
-               
-               
-               default:
-               
-               break;}
-               
-            
+            if (intent == null || intent.getAction() == null) return;
+
+            switch (intent.getAction()) {
+                case "action example":
+                    break;
+                default:
+                    break;
+            }
         }
     };
-    //==============
-    public void delai(int dl){
-       try {Thread.sleep((int)dl); // إعادة المحاولة بعد ثانية
-	                } catch (Exception ex) { 
-                      // handler.obtainMessage(STATE_WAITING).sendToTarget();}
-                      }}
-     public void onDelay(int dl){                 
-        delai(dl);
-       handler.obtainMessage(STATE_WAITING).sendToTarget();  }
-       
-      //=================
-      public void toHandler(String str){
-         handler.obtainMessage(
-                        STATE_MESSAGE_RECEIVED,
-                        str.length(),
-                        -1,
-                        str.getBytes()
-                    ).sendToTarget();
-      } 
-      
-    //=================
-    public void test_Merror(String str){
-        delai(1500);toHandler(str);
-    }   
-    
-    //==============
-       
-    }
-    //============
-    
-    
 
+    public static void delai(int dl) {
+        try {
+            Thread.sleep(dl);
+        } catch (Exception ex) {
+        }
+    }
+
+    public static void onDelay(int dl) {
+        delai(dl);
+        if (handler != null) {
+            handler.obtainMessage(STATE_WAITING).sendToTarget();
+        }
+    }
+
+    public static void toHandler(String str) {
+        if (handler != null && str != null) {
+            handler.obtainMessage(
+                STATE_MESSAGE_RECEIVED,
+                str.length(),
+                -1,
+                str.getBytes()
+            ).sendToTarget();
+        }
+    }
+
+    public static void test_Merror(String str) {
+        delai(1500);
+        toHandler(str);
+    }
+
+    ////
+
+
+}
