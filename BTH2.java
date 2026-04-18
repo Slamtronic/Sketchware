@@ -374,27 +374,24 @@ public void run(){
 
         BufferedInputStream bis = new BufferedInputStream(input);
 
-        StringBuilder buffer = new StringBuilder();
-        byte[] temp = new byte[1024];
-        int bytes;
+        while(true){
 
-        while((bytes = bis.read(temp)) != -1){
+            if(!receivingFile){
 
-            String chunk = new String(temp, 0, bytes);
-            buffer.append(chunk);
+                StringBuilder headerBuilder = new StringBuilder();
+                int ch;
 
-            int index;
+                while((ch = bis.read()) != -1){
+                    if(ch == '\n') break;
+                    headerBuilder.append((char)ch);
+                }
 
-            // 🔥 فصل الرسائل حسب \n
-            while((index = buffer.indexOf("\n")) != -1){
+                String header = headerBuilder.toString();
 
-                String line = buffer.substring(0, index).trim();
-                buffer.delete(0, index + 1);
+                if(header.startsWith("FILE|")){
 
-                // ===== FILE =====
-                if(line.startsWith("FILE|")){
+                    String[] parts = header.split("\\|");
 
-                    String[] parts = line.split("\\|");
                     String name = parts[1];
                     long size = Long.parseLong(parts[2]);
 
@@ -402,42 +399,53 @@ public void run(){
                     if(!dir.exists()) dir.mkdirs();
 
                     File file = new File(dir, name);
-                    FileOutputStream fos = new FileOutputStream(file);
 
-                    byte[] fileBuffer = new byte[4096];
-                    long remaining = size;
+                    fileOut = new FileOutputStream(file);
+                    remainingBytes = size;
+                    receivingFile = true;
 
-                    while(remaining > 0){
-
-                        int read = bis.read(fileBuffer, 0, (int)Math.min(fileBuffer.length, remaining));
-
-                        if(read == -1) break;
-
-                        fos.write(fileBuffer, 0, read);
-                        remaining -= read;
-                    }
-
-                    fos.close();
-
-                    handler.obtainMessage(
-                        STATE_FILE_RECEIVED,
-                        0,
-                        0,
-                        file.getAbsolutePath()
-                    ).sendToTarget();
                 }
 
-                // ===== MESSAGE (أي شيء) =====
-                else{
+                else if(header.startsWith("MSG|")){
+
+                    String text = header.substring(4);
 
                     handler.obtainMessage(
                         STATE_MESSAGE_RECEIVED,
-                        line.length(),
+                        text.length(),
                         -1,
-                        line.getBytes()
+                        text.getBytes()
                     ).sendToTarget();
+
+                }
+
+            }
+
+            else{
+
+                byte[] buffer = new byte[4096];
+                int bytes = bis.read(buffer);
+
+                if(bytes > 0){
+
+                    fileOut.write(buffer,0,bytes);
+                    remainingBytes -= bytes;
+
+                    if(remainingBytes <= 0){
+
+                        fileOut.close();
+                        receivingFile = false;
+
+                        handler.obtainMessage(
+                            STATE_FILE_RECEIVED,
+                            0,
+                            0,
+                            "file received"
+                        ).sendToTarget();
+                    }
                 }
             }
+
         }
 
     }catch(Exception e){
